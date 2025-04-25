@@ -28,8 +28,8 @@
         group: root
         mode: '0644'
       loop:
-        - { src: "aws2_web/templates/nginx.conf.j2", dest: "/etc/nginx/nginx.conf" }
-        - { src: "aws2_web/templates/server.conf.j2", dest: "/etc/nginx/server.conf" }
+        - { src: "../templates/nginx.conf.j2", dest: "/etc/nginx/nginx.conf" }
+        - { src: "../templates/server.conf.j2", dest: "/etc/nginx/server.conf" }
 
     - name: Subir certificados SSL
       ansible.builtin.copy:
