@@ -103,6 +103,12 @@
           --name nginx-alejandro3
           nginx-alejandro3
 
+    - name: Crear directorio .aws si no existe
+      ansible.builtin.file:
+        path: /root/.aws
+        state: directory
+        mode: '0700'
+
     - name: Configurar credenciales AWS desde entorno
       ansible.builtin.copy:
         content: |
