@@ -30,6 +30,8 @@ jobs:
           echo "aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
           echo "aws_session_token=${AWS_SESSION_TOKEN}" >> ~/.aws/credentials
 
+      - name: Verificar autenticación con AWS
+        run: aws sts get-caller-identity
 
       - name: Ejecutar Ansible Playbook
         run: |
