@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Repositorio
         uses: actions/checkout@v3
+        with:
+          ref: Ansible
 
       - name: Configurar AWS credenciales
         uses: aws-actions/configure-aws-credentials@v1
