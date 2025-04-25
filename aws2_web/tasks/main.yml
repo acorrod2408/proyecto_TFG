@@ -8,6 +8,8 @@
     - vars/main.yml
 
   tasks:
+    - include_tasks: set_vars.yml
+  
     - name: Iniciar Docker
       ansible.builtin.service:
         name: docker
