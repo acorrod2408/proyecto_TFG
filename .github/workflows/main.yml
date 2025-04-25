@@ -10,29 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Repositorio
         uses: actions/checkout@v3
 
-      - name: instalar docker
-        run: |
-          sudo apt update
-          sudo apt install -y ansible docker.io
-
-      - name: Configurar las credenciales de AWS
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-        run: |
-          mkdir -p ~/.aws
-          echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${AWS_ACCESS_KEY_ID}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}" >> ~/.aws/credentials
-          echo "aws_session_token=${AWS_SESSION_TOKEN}" >> ~/.aws/credentials
+      - name: Configurar AWS credenciales
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          region: us-east-1
 
       - name: Verificar autenticación con AWS
         run: aws sts get-caller-identity
 
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y ansible docker.io
+
       - name: Ejecutar Ansible Playbook
         run: |
-          ansible-playbook ansible/playbook.yml -i localhost, --connection=local
+          ansible-playbook aws2_web/task/main.yml -i localhost, --connection=local
+
