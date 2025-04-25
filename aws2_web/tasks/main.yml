@@ -101,16 +101,17 @@
           --name nginx-alejandro3
           nginx-alejandro3
 
-    - name: Configurar credenciales AWS desde secrets
+    - name: Configurar credenciales AWS desde entorno
       ansible.builtin.copy:
         content: |
           [default]
-          aws_access_key_id = {{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key = {{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_session_token = {{ secrets.AWS_SESSION_TOKEN }}
+          aws_access_key_id = {{ aws_access_key_id }}
+          aws_secret_access_key = {{ aws_secret_access_key }}
+          aws_session_token = {{ aws_session_token }}
           region = us-east-1
         dest: /root/.aws/credentials
         mode: '0644'
+
 
     - name: Autenticarse en Amazon ECR
       ansible.builtin.shell: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 891376930154.dkr.ecr.us-east-1.amazonaws.com
