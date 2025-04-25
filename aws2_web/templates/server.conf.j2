@@ -1,0 +1,41 @@
+map $http_accept_language $lang {
+    default en;
+    ~*^es es;
+    ~*^en en;
+}
+
+server {
+    listen 80;
+    server_name localhost site2.localhost site3.localhost;
+
+    # Redirigir todo el trafico HTTP a HTTPS
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name localhost;
+
+    # Certificados SSL
+    ssl_certificate     /etc/ssl/certs/certificado.crt;
+    ssl_certificate_key /etc/ssl/private/certificado.key;
+
+    # Raiz del sitio web
+    root /etc/nginx/html;
+    index index.php index.html;
+
+    location ~ .php$ {
+        fastcgi_pass php-fpm-service:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ ^/~(.+?)(/.*)?$ {
+        alias /home/$1/usuarios$2;
+        index index.html;
+        autoindex on;
+    }
+}
+
+

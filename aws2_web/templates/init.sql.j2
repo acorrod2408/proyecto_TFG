@@ -1,0 +1,233 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.0
+-- https://www.phpmyadmin.net/
+--
+-- Servidor: 127.0.0.1:3333
+-- Tiempo de generación: 24-01-2025 a las 10:20:41
+-- Versión del servidor: 10.4.25-MariaDB
+-- Versión de PHP: 7.4.30
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de datos: `tienda`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `carrito`
+--
+
+CREATE TABLE `carrito` (
+  `id_carrito` int(11) NOT NULL,
+  `id_usuario` int(11) DEFAULT NULL,
+  `id_producto` int(11) DEFAULT NULL,
+  `cantidad` int(11) DEFAULT NULL,
+  `precio_total` decimal(10,2) DEFAULT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
+  `estado` varchar(20) DEFAULT 'pendiente'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `carrito`
+--
+
+INSERT INTO `carrito` (`id_carrito`, `id_usuario`, `id_producto`, `cantidad`, `precio_total`, `fecha`, `estado`) VALUES
+(1, 2, 7, 3, '480.00', '2024-12-03 09:19:26', 'comprado'),
+(2, 2, 7, 1, '160.00', '2024-12-03 09:59:15', 'comprado'),
+(3, 2, 7, 1, '160.00', '2024-12-05 11:06:18', 'comprado'),
+(4, 2, 7, 1, '160.00', '2024-12-05 11:06:43', 'comprado'),
+(5, 3, 7, 2, '320.00', '2024-12-12 15:51:48', 'comprado'),
+(6, 3, 9, 1, '70.00', '2024-12-12 15:51:55', 'comprado'),
+(7, 2, 13, 2, '1040.00', '2024-12-13 07:43:13', 'comprado'),
+(8, 4, 7, 2, '320.00', '2025-01-24 07:28:57', 'comprado');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `productos`
+--
+
+CREATE TABLE `productos` (
+  `id_producto` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `precio` decimal(10,2) NOT NULL,
+  `inventario` int(11) NOT NULL,
+  `imagen` blob DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `productos`
+--
+
+INSERT INTO `productos` (`id_producto`, `nombre`, `descripcion`, `precio`, `inventario`, `imagen`) VALUES
+(7, 'Auriculares SONY', 'Auriculares Sony', '160.00', 2, 0x6175726963756c617265732e6a7067),
+(9, 'Auriculares SONY CN-700N', 'Auriculares SONY CN-700n Con una calidad de audio muy buena.', '70.00', 2, 0x434e3730304e2e6a7067),
+(13, 'Microprocesador Intel I7', 'Potencia y rendimiento excepcionales para tareas exigentes. Con múltiples núcleos y la tecnología Turbo Boost, el Intel Core i7 ofrece un rendimiento fluido en aplicaciones de alto rendimiento, edición de video, juegos y multitarea. Ideal para quienes buscan velocidad y eficiencia, proporcionando una experiencia informática de primer nivel.', '520.00', 8, 0x69372e6a7067),
+(14, 'Móvil - Samsung Galaxy S24 Ultra', 'Samsung Galaxy S24 Ultra: El smartphone que combina diseño elegante con innovación tecnológica. Disfruta su pantalla Dynamic AMOLED 2X de 6.8\", cámara principal de 200 MP, y el potente Snapdragon 8 Gen 3. Con S Pen integrado, batería de 5000 mAh y resistencia IP68, es ideal para productividad y entretenimiento. ¡Redescubre la excelencia móvil!', '999.00', 7, 0x7332342e6a7067),
+(15, 'Móvil - Apple iPhone 13', 'El equilibrio perfecto entre diseño y rendimiento. Con su potente chip A15 Bionic, pantalla Super Retina XDR de 6.1\" y sistema de cámaras duales con Modo Cine, captura fotos y videos increíbles. Además, ofrece una batería de larga duración, resistencia al agua (IP68) y el icónico diseño de Apple.', '529.00', 3, 0x6931332e6a7067),
+(18, 'Tablet - Samsung Galaxy Tab S9 FE', 'Disfruta de una pantalla espectacular de 10.9\" con resolución WQXGA, ideal para ver contenido y trabajar. Su potente procesador y compatibilidad con S Pen hacen de esta tablet una herramienta perfecta para productividad y creatividad. Con una batería de larga duración, múltiples opciones de almacenamiento y conectividad, la Galaxy Tab S9 FE ofrece rendimiento y versatilidad en un diseño elegante y portátil.', '385.00', 3, 0x5461626c6574202d2053616d73756e672047616c617879205461622053392046452e6a7067);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `productos_proveedores`
+--
+
+CREATE TABLE `productos_proveedores` (
+  `id_producto` int(11) NOT NULL,
+  `NIE` varchar(20) NOT NULL,
+  `fecha_compra` datetime NOT NULL,
+  `precio` decimal(10,2) NOT NULL,
+  `cantidad` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `productos_proveedores`
+--
+
+INSERT INTO `productos_proveedores` (`id_producto`, `NIE`, `fecha_compra`, `precio`, `cantidad`) VALUES
+(13, '76328422D', '2024-12-13 00:00:00', '1500.00', 3),
+(13, '79651875E', '2024-12-13 00:00:00', '520.00', 1),
+(14, '76328422D', '2025-01-24 00:00:00', '33.00', 3),
+(15, '76328422D', '2025-01-24 10:09:47', '1500.00', 2),
+(15, '76328422D', '2025-01-24 10:09:53', '750.00', 1),
+(18, '79651875E', '2025-01-24 00:00:00', '350.00', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `proveedores`
+--
+
+CREATE TABLE `proveedores` (
+  `NIE` varchar(20) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `direccion` varchar(255) DEFAULT NULL,
+  `telefono` varchar(15) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `proveedores`
+--
+
+INSERT INTO `proveedores` (`NIE`, `nombre`, `direccion`, `telefono`) VALUES
+('76328422D', 'IES iliberis', 'C/Atarfe', '658698676'),
+('79651875E', 'SystemCrl', 'C/Ramon nº12', '687248696');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuarios`
+--
+
+CREATE TABLE `usuarios` (
+  `id_usuario` int(11) NOT NULL,
+  `nombre_usuario` varchar(50) NOT NULL,
+  `contraseña` varchar(255) NOT NULL,
+  `correo` varchar(100) NOT NULL,
+  `rol` enum('admin','cliente') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `usuarios`
+--
+
+INSERT INTO `usuarios` (`id_usuario`, `nombre_usuario`, `contraseña`, `correo`, `rol`) VALUES
+(1, 'acorrod24', 'Alex123', 'alejandro.corod@gmail.com', 'cliente'),
+(2, 'alex', 'alex', 'alex@alex.com', 'admin'),
+(3, 'alvaro', 'alex', 'alvaro@gmail.com', 'cliente'),
+(4, 'dani', 'dani', 'dani@gmail.com', 'cliente');
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `carrito`
+--
+ALTER TABLE `carrito`
+  ADD PRIMARY KEY (`id_carrito`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_producto` (`id_producto`);
+
+--
+-- Indices de la tabla `productos`
+--
+ALTER TABLE `productos`
+  ADD PRIMARY KEY (`id_producto`);
+
+--
+-- Indices de la tabla `productos_proveedores`
+--
+ALTER TABLE `productos_proveedores`
+  ADD PRIMARY KEY (`id_producto`,`NIE`,`fecha_compra`),
+  ADD KEY `NIE` (`NIE`);
+
+--
+-- Indices de la tabla `proveedores`
+--
+ALTER TABLE `proveedores`
+  ADD PRIMARY KEY (`NIE`);
+
+--
+-- Indices de la tabla `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `correo` (`correo`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `carrito`
+--
+ALTER TABLE `carrito`
+  MODIFY `id_carrito` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT de la tabla `productos`
+--
+ALTER TABLE `productos`
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT de la tabla `usuarios`
+--
+ALTER TABLE `usuarios`
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `carrito`
+--
+ALTER TABLE `carrito`
+  ADD CONSTRAINT `carrito_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`),
+  ADD CONSTRAINT `carrito_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`);
+
+--
+-- Filtros para la tabla `productos_proveedores`
+--
+ALTER TABLE `productos_proveedores`
+  ADD CONSTRAINT `productos_proveedores_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `productos_proveedores_ibfk_2` FOREIGN KEY (`NIE`) REFERENCES `proveedores` (`NIE`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

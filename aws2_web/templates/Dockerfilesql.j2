@@ -1,0 +1,13 @@
+FROM mysql:8.4
+
+ENV MYSQL_ROOT_PASSWORD=toor
+ENV MYSQL_DATABASE=tienda
+ENV MYSQL_USER=toor
+ENV MYSQL_PASSWORD=toor
+
+COPY init.sql /docker-entrypoint-initdb.d/
+
+EXPOSE 3306
+
+CMD ["docker-entrypoint.sh", "mysqld"]
+

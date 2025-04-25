@@ -1,0 +1,18 @@
+---
+# defaults file for docker_web
+---
+docker_images:
+  - name: rocky-nginx
+    tag: latest
+    dockerfile: Dockerfile.nginx
+  - name: rocky-apache
+    tag: latest
+    dockerfile: Dockerfile.apache
+
+docker_containers:
+  - name: nginx_container
+    image: rocky-nginx:latest
+    ports: "8080:80"
+  - name: apache_container
+    image: rocky-apache:latest
+    ports: "8081:80"
