@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - Ansible
-  workflow_dispatch:
-  
+  workflow_dispatch:  # Esto habilita la ejecución manual del workflow
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -28,9 +28,22 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y ansible docker.io
+          sudo apt remove -y containerd containerd.io  # Eliminar containerd si está presente
+          sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sudo sh get-docker.sh  # Instalar Docker usando el script oficial
+
+      - name: Verificar instalación de Docker y Ansible
+        run: |
+          docker --version
+          ansible --version
+
+      - name: Verificar archivos en el repositorio
+        run: |
+          ls -l aws2_web/task/
 
       - name: Ejecutar Ansible Playbook
         run: |
           ansible-playbook aws2_web/task/main.yml -i localhost, --connection=local
+
 
