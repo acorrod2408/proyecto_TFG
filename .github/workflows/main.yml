@@ -3,7 +3,7 @@ name: Deploy Docker Images to AWS
 on:
   push:
     branches:
-      - ANSIBLE
+      - Ansible
 
 jobs:
   deploy:
