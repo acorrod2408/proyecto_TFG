@@ -33,7 +33,7 @@
 
     - name: Subir certificados SSL
       ansible.builtin.copy:
-        src: "aws2_web/certificados/certificado.crt"
+        src: "../certificados/certificado.crt"
         dest: "/etc/ssl/certificado.crt"
         mode: '0644'
 
@@ -45,7 +45,7 @@
 
     - name: Copiar clave privada SSL
       ansible.builtin.copy:
-        src: "aws2_web/certificados/private.key"
+        src: "../certificados/private.key"
         dest: "/etc/ssl/private/certificado.key"
         mode: '0644'
 
@@ -56,7 +56,7 @@
 
     - name: Copiar Dockerfile de nginx
       ansible.builtin.copy:
-        src: "aws2_web/templates/Dockerfile.j2"
+        src: "../templates/Dockerfile.j2"
         dest: "/home/runner/Dockerfile"
         mode: '0644'
 
@@ -112,13 +112,13 @@
 
     - name: Copiar script init.sql
       ansible.builtin.copy:
-        src: "aws2_web/templates/init.sql.j2"
+        src: "../templates/init.sql.j2"
         dest: "/home/runner/init.sql"
         mode: '0644'
 
     - name: Copiar Dockerfiles PHP y SQL
       ansible.builtin.copy:
-        src: "aws2_web/templates/{{ item }}"
+        src: "../templates/{{ item }}"
         dest: "/home/runner/{{ item | regex_replace('.j2$', '') }}"
         mode: "0644"
       loop:
