@@ -42,10 +42,10 @@ jobs:
 
       - name: Verificar archivos en el repositorio
         run: |
-          ls -l aws2_web/task/
+          ls -l aws2_web/tasks/
 
       - name: Ejecutar Ansible Playbook
         run: |
-          ansible-playbook aws2_web/task/main.yml -i localhost, --connection=local
+          ansible-playbook aws2_web/tasks/main.yml -i localhost, --connection=local
 
 
