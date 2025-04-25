@@ -46,7 +46,7 @@ jobs:
 
       - name: Verificar archivos en templates
         run: |
-          ls -l aws2_web/tasks/templates/
+          ls -l aws2_web/templates/
 
 
       - name: Ejecutar Ansible Playbook
