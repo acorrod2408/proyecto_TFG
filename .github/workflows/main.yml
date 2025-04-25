@@ -44,6 +44,11 @@ jobs:
         run: |
           ls -l aws2_web/tasks/
 
+      - name: Verificar archivos en templates
+        run: |
+          ls -l aws2_web/tasks/templates/
+
+
       - name: Ejecutar Ansible Playbook
         run: |
           ansible-playbook aws2_web/tasks/main.yml -i localhost, --connection=local
