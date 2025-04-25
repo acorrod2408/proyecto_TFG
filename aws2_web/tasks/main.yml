@@ -54,15 +54,45 @@
         cmd: docker rm -f nginx-alejandro3
       ignore_errors: true
 
-    - name: Copiar Dockerfile de nginx
-      ansible.builtin.copy:
+    - name: Crear carpeta temporal para build de imagen
+      ansible.builtin.file:
+        path: /tmp/nginx_build
+        state: directory
+        mode: '0755'
+
+    - name: Copiar Dockerfile renderizado
+      ansible.builtin.template:
         src: "../templates/Dockerfile.j2"
-        dest: "/home/runner/Dockerfile"
+        dest: /tmp/nginx_build/Dockerfile
+        mode: '0644'
+
+    - name: Copiar nginx.conf
+      ansible.builtin.copy:
+        src: "/etc/nginx/nginx.conf"
+        dest: "/tmp/nginx_build/nginx.conf"
+        mode: '0644'
+
+    - name: Copiar server.conf
+      ansible.builtin.copy:
+        src: "/etc/nginx/server.conf"
+        dest: "/tmp/nginx_build/server.conf"
+        mode: '0644'
+
+    - name: Copiar certificado SSL
+      ansible.builtin.copy:
+        src: "/etc/ssl/certificado.crt"
+        dest: "/tmp/nginx_build/certificado.crt"
+        mode: '0644'
+
+    - name: Copiar clave privada SSL
+      ansible.builtin.copy:
+        src: "/etc/ssl/private/certificado.key"
+        dest: "/tmp/nginx_build/certificado.key"
         mode: '0644'
 
     - name: Construir imagen Docker nginx
       ansible.builtin.command:
-        cmd: docker build -t nginx-alejandro3 /home/runner/
+        cmd: docker build -t nginx-alejandro3 /tmp/nginx_build
 
     - name: Lanzar contenedor nginx
       ansible.builtin.command:
