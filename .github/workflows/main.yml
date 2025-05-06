@@ -1,4 +1,4 @@
-name: Deploy Docker Images to AWS
+name: Subir las imagenes a AWS
 
 on:
   push:
