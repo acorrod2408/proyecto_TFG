@@ -1,203 +1,114 @@
 ---
-- name: Cargar variables de entorno AWS
-  set_fact:
-    aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
-    aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
-    aws_session_token: "{{ lookup('env', 'AWS_SESSION_TOKEN') }}"
-
-- name: Configurar y subir contenedor NGINX a AWS
+- name: Deploy NGINX Docker to ECR
   hosts: localhost
   connection: local
-  become: true
-
   vars_files:
     - vars/main.yml
-
+  vars:
+    ecr_registry: 891376930154.dkr.ecr.us-east-1.amazonaws.com/web
   tasks:
-    - include_tasks: set_vars.yml
-  
-    - name: Iniciar Docker
+
+    - name: Cargar variables AWS desde entorno
+      set_fact:
+        aws_access_key_id: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+        aws_secret_access_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+        aws_session_token: "{{ lookup('env','AWS_SESSION_TOKEN') }}"
+
+    - name: Iniciar servicio Docker
       ansible.builtin.service:
         name: docker
         state: started
         enabled: true
 
-    - name: Crear directorio para conf de nginx
+    - name: Asegurar estructura de SSL y nginx
       ansible.builtin.file:
-        path: /etc/nginx/conf.d
+        path: "{{ item.path }}"
         state: directory
-        mode: '0755'
+        mode: "{{ item.mode }}"
+      loop:
+        - { path: /etc/nginx/conf.d,      mode: '0755' }
+        - { path: /etc/ssl/private,       mode: '0700' }
 
-    - name: Copiar archivos de configuración nginx
+    - name: Copiar configuraciones y certificados
       ansible.builtin.copy:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
-        owner: root
-        group: root
-        mode: '0644'
+        mode: "{{ item.mode }}"
       loop:
-        - { src: "../templates/nginx.conf.j2", dest: "/etc/nginx/nginx.conf" }
-        - { src: "../templates/server.conf.j2", dest: "/etc/nginx/server.conf" }
+        - { src: ../templates/nginx.conf.j2,     dest: /etc/nginx/nginx.conf,      mode: '0644' }
+        - { src: ../templates/server.conf.j2,    dest: /etc/nginx/server.conf,     mode: '0644' }
+        - { src: ../certificados/certificado.crt, dest: /etc/ssl/certificado.crt,    mode: '0644' }
+        - { src: ../certificados/private.key,    dest: /etc/ssl/private/key.pem,    mode: '0600' }
 
-    - name: Subir certificados SSL
-      ansible.builtin.copy:
-        src: "../certificados/certificado.crt"
-        dest: "/etc/ssl/certificado.crt"
-        mode: '0644'
+    - name: Construir imagen nginx
+      community.docker.docker_image:
+        path: /etc/nginx
+        name: nginx-alejandro3
+        tag: latest
+        state: present
 
-    - name: Crear directorio de claves SSL
-      ansible.builtin.file:
-        path: /etc/ssl/private
-        state: directory
-        mode: '0777'
+    - name: Logear en ECR
+      amazon.aws.aws_ecr:
+        registry_ids: ["891376930154"]
+        region: us-east-1
+        aws_access_key: "{{ aws_access_key_id }}"
+        aws_secret_key: "{{ aws_secret_access_key }}"
+        aws_session_token: "{{ aws_session_token }}"
 
-    - name: Copiar clave privada SSL
-      ansible.builtin.copy:
-        src: "../certificados/private.key"
-        dest: "/etc/ssl/private/certificado.key"
-        mode: '0644'
+    - name: Etiquetar y subir imagen a ECR
+      community.docker.docker_image:
+        name: nginx-alejandro3:latest
+        push: true
+        repository: "{{ ecr_registry }}/nginx3"
 
-    - name: Detener y eliminar contenedor nginx (si existe)
-      ansible.builtin.command:
-        cmd: docker rm -f nginx-alejandro3
-      ignore_errors: true
-
-    - name: Crear carpeta temporal para build de imagen
-      ansible.builtin.file:
+    - name: Limpiar build artifacts
+      file:
         path: /tmp/nginx_build
-        state: directory
-        mode: '0755'
+        state: absent
 
-    - name: Copiar Dockerfile renderizado
-      ansible.builtin.template:
-        src: "../templates/Dockerfile.j2"
-        dest: /tmp/nginx_build/Dockerfile
-        mode: '0644'
-
-    - name: Copiar nginx.conf
-      ansible.builtin.copy:
-        src: "/etc/nginx/nginx.conf"
-        dest: "/tmp/nginx_build/nginx.conf"
-        mode: '0644'
-
-    - name: Copiar server.conf
-      ansible.builtin.copy:
-        src: "/etc/nginx/server.conf"
-        dest: "/tmp/nginx_build/server.conf"
-        mode: '0644'
-
-    - name: Copiar certificado SSL
-      ansible.builtin.copy:
-        src: "/etc/ssl/certificado.crt"
-        dest: "/tmp/nginx_build/certificado.crt"
-        mode: '0644'
-
-    - name: Copiar clave privada SSL
-      ansible.builtin.copy:
-        src: "/etc/ssl/private/certificado.key"
-        dest: "/tmp/nginx_build/certificado.key"
-        mode: '0644'
-
-    - name: Construir imagen Docker nginx
-      ansible.builtin.command:
-        cmd: docker build -t nginx-alejandro3 /tmp/nginx_build
-
-    - name: Lanzar contenedor nginx
-      ansible.builtin.command:
-        cmd: >
-          docker run -d -p 80:80 -p 443:443
-          --name nginx-alejandro3
-          nginx-alejandro3
-
-    - name: Crear directorio .aws si no existe
-      ansible.builtin.file:
-        path: /root/.aws
-        state: directory
-        mode: '0700'
-
-    - name: Configurar credenciales AWS desde entorno
-      ansible.builtin.copy:
-        content: |
-          [default]
-          aws_access_key_id = {{ aws_access_key_id }}
-          aws_secret_access_key = {{ aws_secret_access_key }}
-          aws_session_token = {{ aws_session_token }}
-          region = us-east-1
-        dest: /root/.aws/credentials
-        mode: '0644'
-
-
-    - name: Autenticarse en Amazon ECR
-      ansible.builtin.shell: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 891376930154.dkr.ecr.us-east-1.amazonaws.com
-      args:
-        executable: /bin/bash
-
-    - name: Etiquetar imagen nginx
-      ansible.builtin.command:
-        cmd: docker tag nginx-alejandro3:latest 891376930154.dkr.ecr.us-east-1.amazonaws.com/web:nginx3
-
-    - name: Subir imagen nginx a Amazon ECR
-      ansible.builtin.command:
-        cmd: docker push 891376930154.dkr.ecr.us-east-1.amazonaws.com/web:nginx3
-
-
-- name: Configurar contenedores PHP y SQL y subirlos a AWS
+- name: Deploy PHP & SQL Containers to ECR
   hosts: localhost
   connection: local
-  become: true
-
   vars_files:
     - vars/main.yml
-
+  vars:
+    ecr_registry: 891376930154.dkr.ecr.us-east-1.amazonaws.com/web
   tasks:
-    - name: Eliminar contenedores PHP y SQL (si existen)
-      ansible.builtin.command:
-        cmd: docker rm -f php-container sql-container
-      ignore_errors: true
 
-    - name: Copiar script init.sql
+    - name: Eliminar contenedores previos
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - php-container
+        - sql-container
+
+    - name: Copiar init.sql
       ansible.builtin.copy:
-        src: "../templates/init.sql.j2"
-        dest: "/home/runner/init.sql"
+        src: ../templates/init.sql.j2
+        dest: /home/runner/init.sql
         mode: '0644'
 
-    - name: Copiar Dockerfiles PHP y SQL
-      ansible.builtin.copy:
-        src: "../templates/{{ item }}"
-        dest: "/home/runner/{{ item | regex_replace('.j2$', '') }}"
-        mode: "0644"
+    - name: Construir y subir imágenes PHP y SQL
+      block:
+        - name: Construir {{ item.name }}
+          community.docker.docker_image:
+            build:
+              path: /home/runner
+              dockerfile: "{{ item.dockerfile }}"
+            name: "{{ item.image }}:latest"
+        - name: Logear en ECR
+          amazon.aws.aws_ecr:
+            registry_ids: ["891376930154"]
+            region: us-east-1
+            aws_access_key: "{{ aws_access_key_id }}"
+            aws_secret_key: "{{ aws_secret_access_key }}"
+            aws_session_token: "{{ aws_session_token }}"
+        - name: Etiquetar y push {{ item.image }}
+          community.docker.docker_image:
+            name: "{{ item.image }}:latest"
+            push: true
+            repository: "{{ ecr_registry }}/{{ item.tag }}"
       loop:
-        - Dockerfilephp.j2
-        - Dockerfilesql.j2
-
-    - name: Construir imágenes Docker PHP y SQL
-      ansible.builtin.command:
-        cmd: docker build -t {{ item.image }} -f /home/runner/{{ item.dockerfile }} /home/runner/
-      loop:
-        - { image: "php-container", dockerfile: "Dockerfilephp" }
-        - { image: "sql-container", dockerfile: "Dockerfilesql" }
-
-    - name: Lanzar contenedores PHP y SQL
-      ansible.builtin.command:
-        cmd: >
-          docker run -d --name {{ item.name }}
-          {{ item.ports }}
-          {{ item.image }}
-      loop:
-        - { name: "php-container", image: "php-container", ports: "-p 9000:9000" }
-        - { name: "sql-container", image: "sql-container", ports: "-p 3306:3306" }
-
-    - name: Etiquetar imágenes para Amazon ECR
-      ansible.builtin.command:
-        cmd: docker tag {{ item.image }}:latest 891376930154.dkr.ecr.us-east-1.amazonaws.com/web:{{ item.tag }}
-      loop:
-        - { image: "php-container", tag: "php" }
-        - { image: "sql-container", tag: "sql" }
-
-    - name: Subir imágenes PHP y SQL a Amazon ECR
-      ansible.builtin.command:
-        cmd: docker push 891376930154.dkr.ecr.us-east-1.amazonaws.com/web:{{ item }}
-      loop:
-        - php
-        - sql
-
+        - { name: "PHP",  image: "php-container", dockerfile: "Dockerfilephp", tag: "php" }
+        - { name: "SQL",  image: "sql-container", dockerfile: "Dockerfilesql", tag: "sql" }
