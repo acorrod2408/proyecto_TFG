@@ -30,20 +30,11 @@ jobs:
       - name: Aplicar volúmenes EFS
         run: kubectl apply -f pod/volumenes_efs.yml
 
-      - name: Esperar a que el PVC esté Bound
-        run: kubectl wait --for=condition=bound pvc/php-pvc --timeout=120s
-
       - name: Desplegar la base de datos MySQL
         run: kubectl apply -f pod/deploymentsql.yml
-
-      - name: Esperar a que MySQL esté listo
-        run: kubectl rollout status deployment/mysql-deployment --timeout=120s
-
+        
       - name: Desplegar PHP-FPM
         run: kubectl apply -f pod/deploymentphp.yml
-
-      - name: Esperar a que PHP-FPM arranque
-        run: kubectl rollout status deployment/php-fpm-deployment --timeout=120s
-
+        
       - name: Desplegar Nginx (web)
         run: kubectl apply -f pod/deployment.yml
