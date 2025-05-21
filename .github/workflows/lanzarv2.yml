@@ -24,32 +24,26 @@ jobs:
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region:            us-east-1
 
-      - name: Depurar espacio de trabajo
-        run: |
-          echo "PWD: $(pwd)"
-          ls -R .
-
-
       - name: Modificar la configuración de EKS
         run: aws eks update-kubeconfig --name tecnoiliberis --region us-east-1
 
       - name: Aplicar volúmenes EFS
-        run: kubectl apply -f volumenes_efs.yml
+        run: kubectl apply -f pod/volumenes_efs.yml
 
       - name: Esperar a que el PVC esté Bound
         run: kubectl wait --for=condition=bound pvc/php-pvc --timeout=60s
 
       - name: Desplegar la base de datos MySQL
-        run: kubectl apply -f deploymentsql.yml
+        run: kubectl apply -f pod/deploymentsql.yml
 
       - name: Esperar a que MySQL esté listo
-        run: kubectl rollout status deployment/mysql-deployment --timeout=120s
+        run: kubectl rollout status deployment/mysql-deployment --timeout=10s
 
       - name: Desplegar PHP-FPM
-        run: kubectl apply -f deploymentphp.yml
+        run: kubectl apply -f pod/deploymentphp.yml
 
       - name: Esperar a que PHP-FPM arranque
         run: kubectl rollout status deployment/php-fpm-deployment --timeout=60s
 
       - name: Desplegar Nginx (web)
-        run: kubectl apply -f deployment.yml
+        run: kubectl apply -f pod/deployment.yml
