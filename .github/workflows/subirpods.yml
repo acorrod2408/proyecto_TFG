@@ -22,6 +22,12 @@ jobs:
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region:            us-east-1
 
+      - name: Depurar espacio de trabajo
+        run: |
+          echo "PWD: $(pwd)"
+          ls -R .
+
+
       - name: Modificar la configuración de EKS
         run: aws eks update-kubeconfig --name tecnoiliberis --region us-east-1
 
