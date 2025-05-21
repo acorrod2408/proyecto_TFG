@@ -1,0 +1,55 @@
+name: Lanzar YMLs v2
+
+on:
+  push:
+    branches:
+      - Kubernetes
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repositorios
+        uses: actions/checkout@v3
+        with:
+          ref: Kubernetes
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region:            us-east-1
+
+      - name: Depurar espacio de trabajo
+        run: |
+          echo "PWD: $(pwd)"
+          ls -R .
+
+
+      - name: Modificar la configuración de EKS
+        run: aws eks update-kubeconfig --name tecnoiliberis --region us-east-1
+
+      - name: Aplicar volúmenes EFS
+        run: kubectl apply -f volumenes_efs.yml
+
+      - name: Esperar a que el PVC esté Bound
+        run: kubectl wait --for=condition=bound pvc/php-pvc --timeout=60s
+
+      - name: Desplegar la base de datos MySQL
+        run: kubectl apply -f deploymentsql.yml
+
+      - name: Esperar a que MySQL esté listo
+        run: kubectl rollout status deployment/mysql-deployment --timeout=120s
+
+      - name: Desplegar PHP-FPM
+        run: kubectl apply -f deploymentphp.yml
+
+      - name: Esperar a que PHP-FPM arranque
+        run: kubectl rollout status deployment/php-fpm-deployment --timeout=60s
+
+      - name: Desplegar Nginx (web)
+        run: kubectl apply -f deployment.yml
