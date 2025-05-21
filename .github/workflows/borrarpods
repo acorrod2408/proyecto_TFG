@@ -1,9 +1,6 @@
 name: Eliminar pods
 
 on:
-  push:
-    branches:
-      - Kubernetes
   workflow_dispatch:
 
 jobs:
