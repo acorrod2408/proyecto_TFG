@@ -17,8 +17,6 @@ spec:
       labels:
         app: web
     spec:
-      imagePullSecrets:
-        - name: ecr-secret
       containers:
         - name: web
           image: 891376930154.dkr.ecr.us-east-1.amazonaws.com/web:nginx3
@@ -33,5 +31,4 @@ spec:
         - name: php-storage
           persistentVolumeClaim:
             claimName: php-pvc
-      imagePullSecrets:
-        - name: ecr-secret
+
