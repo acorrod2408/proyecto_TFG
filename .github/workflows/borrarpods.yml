@@ -13,7 +13,7 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.ref_name }}
+          ref: Kubernetes
 
       - name: Configurar credenciales de AWS
         uses: aws-actions/configure-aws-credentials@v2
