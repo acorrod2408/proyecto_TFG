@@ -3,7 +3,7 @@ name: Lanzar YMLs
 on:
   push:
     branches:
-      - kubernetes
+      - Kubernetes
   workflow_dispatch:
 
 jobs:
