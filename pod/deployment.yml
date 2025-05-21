@@ -21,7 +21,7 @@ spec:
         - name: ecr-secret
       containers:
         - name: web
-          image: 386497974168.dkr.ecr.us-east-1.amazonaws.com/web:nginx3
+          image: 891376930154.dkr.ecr.us-east-1.amazonaws.com/web:nginx3
           imagePullPolicy: Always
           ports:
             - containerPort: 80
