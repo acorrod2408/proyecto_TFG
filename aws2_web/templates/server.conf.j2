@@ -6,7 +6,7 @@ map $http_accept_language $lang {
 
 server {
     listen 80;
-    server_name localhost site2.localhost site3.localhost;
+    server_name tecnoiliberis.com www.tecnoiliberis.com;
 
     # Redirigir todo el trafico HTTP a HTTPS
     return 301 https://$host$request_uri;
@@ -14,11 +14,22 @@ server {
 
 server {
     listen 443 ssl;
-    server_name localhost;
+    server_name tecnoiliberis.com www.tecnoiliberis.com;
 
     # Certificados SSL
     ssl_certificate     /etc/ssl/certs/certificado.crt;
     ssl_certificate_key /etc/ssl/private/certificado.key;
+
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    # HSTS y cabeceras de seguridad
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-XSS-Protection "1; mode=block";
 
     # Raiz del sitio web
     root /etc/nginx/html;
