@@ -39,7 +39,7 @@
 
     - name: Subir certificados SSL
       ansible.builtin.copy:
-        src: "../certificados/certificado.crt"
+        src: "../certificados/fullchain.pem"
         dest: "/etc/ssl/certificado.crt"
         mode: '0644'
 
