@@ -5,7 +5,11 @@ on:
     branches:
       - Kubernetes
   workflow_dispatch:
-
+  workflow_run:
+    workflows: ["2. Implementar Terraform a AWS"]
+    types:
+      - completed
+      
 jobs:
   deploy:
     runs-on: ubuntu-latest
