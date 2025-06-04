@@ -1,4 +1,4 @@
-name: Eliminar pods
+name: 3.1 Eliminar pods (opcional)
 
 on:
   push:
