@@ -72,7 +72,7 @@ data "aws_s3_bucket" "backup" {
 
 
 
-resource "aws_instance" "app_server" {
+resource "aws_instance" "administracion" {
   ami                         = var.ami_id
   instance_type               = var.tipo_instancia
   subnet_id                   = module.redes.subnet_ids[0]
