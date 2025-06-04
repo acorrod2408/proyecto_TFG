@@ -5,10 +5,15 @@ on:
     branches:
       - Kubernetes
   workflow_dispatch:
-      
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions: # Add this section to define permissions
+      actions: read # Grant read permission for actions
+      contents: read # Often needed for checkout and other operations
+      # Add other permissions as needed, e.g., if you write to the repo:
+      # contents: write
 
     steps:
       - name: Repositorios
@@ -21,7 +26,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh run list --repo ${{ github.repository }}
-
+          # You might not strictly need this step if you're only downloading
+          # a known artifact. If you're trying to dynamically find artifacts,
+          # then you need this.
 
       - name: Descargar artefacto EFS ID
         uses: actions/download-artifact@v4
@@ -43,15 +50,19 @@ jobs:
         run: |
           sed -i "s/fs-REEMPLAZAR-ID-EFS/${{ env.EFS_ID }}/g" pod/volumenes_efs.yml
 
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id:       ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region:            us-east-1
+          aws-session-token:       ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region:              us-east-1
 
+      - name: Modificar la configuración de EKS
+        run: aws eks update-kubeconfig --name tecnoiliberis --region us-east-1
+
+      - name: Aplicar Deployments
+        run: kubectl apply -f pod/
       - name: Modificar la configuración de EKS
         run: aws eks update-kubeconfig --name tecnoiliberis --region us-east-1
 
