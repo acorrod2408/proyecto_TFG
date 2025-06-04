@@ -9,11 +9,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions: # Add this section to define permissions
-      actions: read # Grant read permission for actions
-      contents: read # Often needed for checkout and other operations
-      # Add other permissions as needed, e.g., if you write to the repo:
-      # contents: write
+    permissions:
+      actions: read
+      contents: read
 
     steps:
       - name: Repositorios
@@ -21,25 +19,21 @@ jobs:
         with:
           ref: Kubernetes
 
-      - name: Listar artefactos disponibles
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh run list --repo ${{ github.repository }}
-          # You might not strictly need this step if you're only downloading
-          # a known artifact. If you're trying to dynamically find artifacts,
-          # then you need this.
-
-      - name: Descargar artefacto EFS ID
-        uses: actions/download-artifact@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: efs-id
-          path: ./efs-artifact
+          aws-access-key-id:       ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key:   ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:       ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region:              us-east-1
+
+      - name: Descargar EFS ID desde S3
+        run: aws s3 cp s3://<NOMBRE_DEL_BUCKET>/efs_id.txt ./efs_id.txt
 
       - name: Leer EFS ID
         id: read_efs
         run: |
-          EFS_ID=$(cat ./efs-artifact/efs_id.txt)
+          EFS_ID=$(cat ./efs_id.txt)
           echo "EFS_ID=$EFS_ID" >> $GITHUB_ENV
           echo "efs_id=$EFS_ID" >> $GITHUB_OUTPUT
 
@@ -50,21 +44,9 @@ jobs:
         run: |
           sed -i "s/fs-REEMPLAZAR-ID-EFS/${{ env.EFS_ID }}/g" pod/volumenes_efs.yml
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id:       ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token:       ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region:              us-east-1
-
       - name: Modificar la configuración de EKS
         run: aws eks update-kubeconfig --name tecnoiliberis --region us-east-1
 
       - name: Aplicar Deployments
         run: kubectl apply -f pod/
-      - name: Modificar la configuración de EKS
-        run: aws eks update-kubeconfig --name tecnoiliberis --region us-east-1
 
-      - name: Aplicar Deployments
-        run: kubectl apply -f pod/
