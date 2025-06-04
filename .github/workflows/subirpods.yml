@@ -16,6 +16,10 @@ jobs:
         with:
           ref: Kubernetes
 
+      - name: Listar artefactos disponibles
+        run: |
+          gh run list --repo ${{ github.repository }}
+
       - name: Descargar artefacto EFS ID
         uses: actions/download-artifact@v4
         with:
