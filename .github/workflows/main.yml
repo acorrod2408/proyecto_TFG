@@ -1,4 +1,4 @@
-name: Subir las imagenes a AWS
+name: 1. Subir las imagenes a AWS
 
 on:
   push:
