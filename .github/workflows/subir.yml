@@ -56,7 +56,7 @@ jobs:
       - name: Extraer id del EFS
         id: output
         run: |
-          EFS_ID=$(terraform -chdir=prod output -raw efs_id)
+          EFS_ID=$(terraform -chdir=principal output -raw efs_id)
           echo "EFS_ID=$EFS_ID" >> $GITHUB_ENV
           echo "$EFS_ID" > efs_id.txt
 
