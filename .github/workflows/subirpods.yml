@@ -28,7 +28,7 @@ jobs:
           aws-region:              us-east-1
 
       - name: Descargar EFS ID desde S3
-        run: aws s3 cp s3://<NOMBRE_DEL_BUCKET>/efs_id.txt ./efs_id.txt
+        run: aws s3 cp s3://acorrod2408-copia/efs_id.txt ./efs_id.txt
 
       - name: Leer EFS ID
         id: read_efs
