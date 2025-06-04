@@ -34,7 +34,7 @@ jobs:
 
       - name: Reemplazar volumeHandle
         run: |
-          sed -i "s/fs-[a-z0-9]*/$EFS_ID/g" pod/volumenes_efs.yml
+          sed -i "s/fs-REEMPLAZAR-ID-EFS/$EFS_ID/g" pod/volumenes_efs.yml
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
