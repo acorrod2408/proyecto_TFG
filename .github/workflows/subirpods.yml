@@ -30,11 +30,12 @@ jobs:
           echo "efs_id=$EFS_ID" >> $GITHUB_OUTPUT
 
       - name: Mostrar EFS_ID para debug
-        run: echo "EFS ID es $EFS_ID"
+        run: echo "EFS ID es ${{ env.EFS_ID }}"
 
       - name: Reemplazar volumeHandle
         run: |
-          sed -i "s/fs-REEMPLAZAR-ID-EFS/$EFS_ID/g" pod/volumenes_efs.yml
+          sed -i "s/fs-REEMPLAZAR-ID-EFS/${{ env.EFS_ID }}/g" pod/volumenes_efs.yml
+
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
