@@ -1,0 +1,57 @@
+name: 2.1 Destroy Infrastructure (Opcional)
+
+on:
+  push:
+    branches:
+      - Terraform
+  workflow_dispatch:
+
+jobs:
+  destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: List workspace files
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -R .
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region:            ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        working-directory: prod
+        run: terraform init -input=false -reconfigure
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
+          TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
+          TF_VAR_git_token: ${{ secrets.GIT_TOKEN }}
+
+      - name: Terraform Destroy
+        working-directory: prod
+        run: terraform destroy -lock=false -auto-approve
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
+          TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
+          TF_VAR_git_token: ${{ secrets.GIT_TOKEN }}
+
+
+      - name: Terraform Destroy
+        working-directory: prod
+        run: terraform destroy -lock=false -auto-approve
