@@ -16,6 +16,26 @@ jobs:
         with:
           ref: Kubernetes
 
+      - name: Descargar artefacto EFS ID
+        uses: actions/download-artifact@v3
+        with:
+          name: efs-id
+          path: ./efs-artifact
+
+      - name: Leer EFS ID
+        id: read_efs
+        run: |
+          EFS_ID=$(cat ./efs-artifact/efs_id.txt)
+          echo "EFS_ID=$EFS_ID" >> $GITHUB_ENV
+          echo "efs_id=$EFS_ID" >> $GITHUB_OUTPUT
+
+      - name: Mostrar EFS_ID para debug
+        run: echo "EFS ID es $EFS_ID"
+
+      - name: Reemplazar volumeHandle
+        run: |
+          sed -i "s/fs-[a-z0-9]*/$EFS_ID/g" pod/volumenes_efs.yml
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -23,12 +43,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region:            us-east-1
-
-      - name: Depurar espacio de trabajo
-        run: |
-          echo "PWD: $(pwd)"
-          ls -R .
-
 
       - name: Modificar la configuración de EKS
         run: aws eks update-kubeconfig --name tecnoiliberis --region us-east-1
