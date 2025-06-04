@@ -65,3 +65,6 @@ jobs:
         with:
           name: efs-id
           path: efs_id.txt
+          
+      - name: Subir efs_id.txt a S3
+        run: aws s3 cp efs_id.txt s3://acorrod2408-copia/efs_id.txt
