@@ -57,7 +57,6 @@ if ($res === false) {
           name="buscar"
           placeholder="Nombre de usuario o correo"
           value="<?= htmlspecialchars($_GET['buscar'] ?? '') ?>"
-          required
         >
         <button type="submit">Buscar</button>
       </form>
